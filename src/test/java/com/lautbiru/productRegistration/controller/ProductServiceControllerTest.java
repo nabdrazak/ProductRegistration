@@ -38,11 +38,7 @@ public class ProductServiceControllerTest {
 
     @Test
     public void testCreateProduct() throws Exception {
-        mockMvc.perform(post("/products/")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("{\"products\":[{\"id\":\"7\",\"name\":\"ciku\"},{\"id\":\"8\",\"name\":\"Guava\"}]}")
-        ).andExpect(status().isOk())
-        .andExpect(jsonPath("$", containsString("Product is created successfully")));
+        dummyData();
 
         mockMvc.perform(get("/products/"))
         .andExpect(status().isOk())
@@ -58,12 +54,7 @@ public class ProductServiceControllerTest {
 
     @Test
     void testDelete() throws Exception {
-
-        mockMvc.perform(post("/products/")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("{\"products\":[{\"id\":\"7\",\"name\":\"ciku\"},{\"id\":\"8\",\"name\":\"Guava\"}]}")
-        ).andExpect(status().isOk())
-        .andExpect(jsonPath("$", containsString("Product is created successfully")));
+        dummyData();
 
         ProductServiceImpl productServiceImpl = new ProductServiceImpl();
         assertEquals(2, productServiceImpl.getProduct().size());
@@ -84,11 +75,7 @@ public class ProductServiceControllerTest {
 
     @Test
     public void testGetProduct() throws Exception {
-        mockMvc.perform(post("/products/")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("{\"products\":[{\"id\":\"7\",\"name\":\"ciku\"},{\"id\":\"8\",\"name\":\"Guava\"}]}")
-        ).andExpect(status().isOk())
-        .andExpect(jsonPath("$", containsString("Product is created successfully")));
+        dummyData();
 
         mockMvc.perform(get("/products/"))
         .andExpect(status().isOk())
@@ -102,11 +89,7 @@ public class ProductServiceControllerTest {
 
     @Test
     void testGetProductById() throws Exception {
-        mockMvc.perform(post("/products/")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("{\"products\":[{\"id\":\"7\",\"name\":\"ciku\"},{\"id\":\"8\",\"name\":\"Guava\"}]}")
-        ).andExpect(status().isOk())
-        .andExpect(jsonPath("$", containsString("Product is created successfully")));
+        dummyData();
 
         mockMvc.perform(get("/products/8"))
         .andExpect(status().isOk())
@@ -120,11 +103,7 @@ public class ProductServiceControllerTest {
 
     @Test
     void testUpdateProduct() throws Exception {
-        mockMvc.perform(post("/products/")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("{\"products\":[{\"id\":\"7\",\"name\":\"ciku\"},{\"id\":\"8\",\"name\":\"Guava\"}]}")
-        ).andExpect(status().isOk())
-        .andExpect(jsonPath("$", containsString("Product is created successfully")));
+        dummyData();
 
         mockMvc.perform(put("/products/7")
         .contentType(MediaType.APPLICATION_JSON)
@@ -136,5 +115,13 @@ public class ProductServiceControllerTest {
         ProductServiceImpl productServiceImpl = new ProductServiceImpl();
         productServiceImpl.deleteProduct("7");
         productServiceImpl.deleteProduct("8");
+    }
+
+    public void dummyData() throws Exception {
+        mockMvc.perform(post("/products/")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("{\"products\":[{\"id\":\"7\",\"name\":\"ciku\"},{\"id\":\"8\",\"name\":\"Guava\"}]}")
+        ).andExpect(status().isOk())
+        .andExpect(jsonPath("$", containsString("Product is created successfully")));
     }
 }

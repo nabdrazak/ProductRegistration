@@ -5,25 +5,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.lautbiru.productRegistration.model.Product;
 
 public class ProductServiceImplTest {
 
+    ProductServiceImpl productService;
+
+    @BeforeEach
+    void setUp() {
+        productService = new ProductServiceImpl();
+        productService.createProduct(record());
+    }
+
     @Test
     void testCreateProduct() {
-        ProductServiceImpl productService = new ProductServiceImpl();
-        productService.createProduct(record());
-
         assertTrue(productService.isProductExists(record().getId()));
     }
 
     @Test
     void testDeleteProduct() {
-        ProductServiceImpl productService = new ProductServiceImpl();
-
-        productService.createProduct(record());
         assertEquals(1, productService.getProduct().size());
         productService.deleteProduct(record().getId());
 
@@ -32,9 +35,6 @@ public class ProductServiceImplTest {
 
     @Test
     void testGetProduct() {
-        ProductServiceImpl productService = new ProductServiceImpl();
-        productService.createProduct(record());
-
         List<Product> iterator = productService.getProduct().stream().toList();
 
         boolean idExists = false;
@@ -49,28 +49,16 @@ public class ProductServiceImplTest {
 
     @Test
     void testGetProductById() {
-        ProductServiceImpl productService = new ProductServiceImpl();
-
-        productService.createProduct(record());
-
         assertEquals(productService.getProduct(record().getId()).getName(), "Pineapple");
     }
 
     @Test
     void testIsProductExists() {
-        ProductServiceImpl productService = new ProductServiceImpl();
-
-        productService.createProduct(record());
-
         assertTrue(productService.isProductExists(record().getId()));
     }
 
     @Test
     void testUpdateProduct() {
-        ProductServiceImpl productService = new ProductServiceImpl();
-
-        productService.createProduct(record());
-
         Product product = new Product();
         product.setId("3");
         product.setName("Mangostene");
