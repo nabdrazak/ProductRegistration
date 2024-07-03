@@ -24,10 +24,10 @@ public class ProductServiceImplTest {
         ProductServiceImpl productService = new ProductServiceImpl();
 
         productService.createProduct(record());
-        assertEquals(3, productService.getProduct().size());
+        assertEquals(1, productService.getProduct().size());
         productService.deleteProduct(record().getId());
 
-        assertEquals(2, productService.getProduct().size());
+        assertEquals(0, productService.getProduct().size());
     }
 
     @Test

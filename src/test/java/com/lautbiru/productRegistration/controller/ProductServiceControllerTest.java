@@ -46,8 +46,8 @@ public class ProductServiceControllerTest {
 
         mockMvc.perform(get("/products/"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(4)))
-        .andExpect(jsonPath("$[3].name", is("Guava")));
+        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(jsonPath("$[1].name", is("Guava")));
 
         //TO empty static value "hotelReservationService" in HotelReservationController.
         // To avoid any unit test failure when executing all unit tests
@@ -59,6 +59,12 @@ public class ProductServiceControllerTest {
     @Test
     void testDelete() throws Exception {
 
+        mockMvc.perform(post("/products/")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("{\"products\":[{\"id\":\"7\",\"name\":\"ciku\"},{\"id\":\"8\",\"name\":\"Guava\"}]}")
+        ).andExpect(status().isOk())
+        .andExpect(jsonPath("$", containsString("Product is created successfully")));
+
         ProductServiceImpl productServiceImpl = new ProductServiceImpl();
         assertEquals(2, productServiceImpl.getProduct().size());
 
@@ -66,48 +72,69 @@ public class ProductServiceControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(2)));
 
-        mockMvc.perform(delete("/products/2"))
+        mockMvc.perform(delete("/products/7"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", containsString("Product is deleted successfully")));
 
         assertEquals(1, productServiceImpl.getProduct().size());
 
         //Update back to it's original value to avoid other unit test failure when executing the class
-        mockMvc.perform(post("/products/")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("{\"products\":[{\"id\":\"7\",\"name\":\"Almond\"}]}")
-        ).andExpect(status().isOk())
-        .andExpect(jsonPath("$", containsString("Product is created successfully")));
+        productServiceImpl.deleteProduct("8");
     }
 
     @Test
     public void testGetProduct() throws Exception {
+        mockMvc.perform(post("/products/")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("{\"products\":[{\"id\":\"7\",\"name\":\"ciku\"},{\"id\":\"8\",\"name\":\"Guava\"}]}")
+        ).andExpect(status().isOk())
+        .andExpect(jsonPath("$", containsString("Product is created successfully")));
+
         mockMvc.perform(get("/products/"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(2)));
+
+        //Update back to it's original value to avoid other unit test failure when executing the class
+        ProductServiceImpl productServiceImpl = new ProductServiceImpl();
+        productServiceImpl.deleteProduct("7");
+        productServiceImpl.deleteProduct("8");
     }
 
     @Test
     void testGetProductById() throws Exception {
-        mockMvc.perform(get("/products/2"))
+        mockMvc.perform(post("/products/")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("{\"products\":[{\"id\":\"7\",\"name\":\"ciku\"},{\"id\":\"8\",\"name\":\"Guava\"}]}")
+        ).andExpect(status().isOk())
+        .andExpect(jsonPath("$", containsString("Product is created successfully")));
+
+        mockMvc.perform(get("/products/8"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id", is("2")))
-        .andExpect(jsonPath("$.name", is("Almond")));
+        .andExpect(jsonPath("$.id", is("8")))
+        .andExpect(jsonPath("$.name", is("Guava")));
+
+        ProductServiceImpl productServiceImpl = new ProductServiceImpl();
+        productServiceImpl.deleteProduct("7");
+        productServiceImpl.deleteProduct("8");
     }
 
     @Test
     void testUpdateProduct() throws Exception {
-        mockMvc.perform(put("/products/2")
+        mockMvc.perform(post("/products/")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("{\"products\":[{\"id\":\"7\",\"name\":\"ciku\"},{\"id\":\"8\",\"name\":\"Guava\"}]}")
+        ).andExpect(status().isOk())
+        .andExpect(jsonPath("$", containsString("Product is created successfully")));
+
+        mockMvc.perform(put("/products/7")
         .contentType(MediaType.APPLICATION_JSON)
         .content("{\"name\":\"Tamarind\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", containsString("Product is updated successfully")));
 
         //Update back to it's original value to avoid other unit test failure when executing the class
-        mockMvc.perform(put("/products/2")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("{\"name\":\"Almond\"}"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$", containsString("Product is updated successfully")));
+        ProductServiceImpl productServiceImpl = new ProductServiceImpl();
+        productServiceImpl.deleteProduct("7");
+        productServiceImpl.deleteProduct("8");
     }
 }
