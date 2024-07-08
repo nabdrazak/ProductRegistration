@@ -1,5 +1,17 @@
 package com.lautbiru.productRegistration.controller;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
@@ -9,18 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.lautbiru.productRegistration.exception.DuplicationIdException;
+import com.lautbiru.productRegistration.exception.ProductExceptionController;
 import com.lautbiru.productRegistration.service.ProductServiceImpl;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 public class ProductServiceControllerTest {
@@ -30,10 +33,13 @@ public class ProductServiceControllerTest {
     @Autowired
     ProductServiceController productServiceController;
 
+    @Autowired
+    ProductExceptionController productExceptionController;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(productServiceController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(productServiceController, productExceptionController).build();
     }
 
     @Test
@@ -47,9 +53,21 @@ public class ProductServiceControllerTest {
 
         //TO empty static value "hotelReservationService" in HotelReservationController.
         // To avoid any unit test failure when executing all unit tests
-        ProductServiceImpl productServiceImpl = new ProductServiceImpl();
-        productServiceImpl.deleteProduct("7");
-        productServiceImpl.deleteProduct("8");
+        cleanup_unit_tests();
+    }
+
+    @Test
+    public void testCreateProduct_duplicateId() throws Exception {
+        dummyData();
+        mockMvc.perform(post("/products/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content("{\"products\":[{\"id\":\"7\",\"name\":\"Duku\"}]}")
+                ).andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof DuplicationIdException));
+
+        // To avoid any unit test failure when executing all unit tests
+        cleanup_unit_tests();
     }
 
     @Test
@@ -82,9 +100,7 @@ public class ProductServiceControllerTest {
         .andExpect(jsonPath("$", hasSize(2)));
 
         //Update back to it's original value to avoid other unit test failure when executing the class
-        ProductServiceImpl productServiceImpl = new ProductServiceImpl();
-        productServiceImpl.deleteProduct("7");
-        productServiceImpl.deleteProduct("8");
+        cleanup_unit_tests();
     }
 
     @Test
@@ -96,9 +112,7 @@ public class ProductServiceControllerTest {
         .andExpect(jsonPath("$.id", is("8")))
         .andExpect(jsonPath("$.name", is("Guava")));
 
-        ProductServiceImpl productServiceImpl = new ProductServiceImpl();
-        productServiceImpl.deleteProduct("7");
-        productServiceImpl.deleteProduct("8");
+        cleanup_unit_tests();
     }
 
     @Test
@@ -112,9 +126,7 @@ public class ProductServiceControllerTest {
         .andExpect(jsonPath("$", containsString("Product is updated successfully")));
 
         //Update back to it's original value to avoid other unit test failure when executing the class
-        ProductServiceImpl productServiceImpl = new ProductServiceImpl();
-        productServiceImpl.deleteProduct("7");
-        productServiceImpl.deleteProduct("8");
+        cleanup_unit_tests();
     }
 
     public void dummyData() throws Exception {
@@ -123,5 +135,12 @@ public class ProductServiceControllerTest {
         .content("{\"products\":[{\"id\":\"7\",\"name\":\"ciku\"},{\"id\":\"8\",\"name\":\"Guava\"}]}")
         ).andExpect(status().isOk())
         .andExpect(jsonPath("$", containsString("Product is created successfully")));
+    }
+
+    public void cleanup_unit_tests() {
+        //Update back to it's original value to avoid other unit test failure when executing the class
+        ProductServiceImpl productServiceImpl = new ProductServiceImpl();
+        productServiceImpl.deleteProduct("7");
+        productServiceImpl.deleteProduct("8");
     }
 }

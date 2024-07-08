@@ -1,5 +1,6 @@
 package com.lautbiru.productRegistration.controller;
 
+import com.lautbiru.productRegistration.exception.DuplicationIdException;
 import com.lautbiru.productRegistration.exception.ProductNotFoundException;
 import com.lautbiru.productRegistration.model.Product;
 import com.lautbiru.productRegistration.service.ProductService;
@@ -49,11 +50,20 @@ public class ProductServiceController {
 
     @PostMapping(value = "/")
     public ResponseEntity<Object> createProduct(@RequestBody ProductWrapper products) {
-
+        boolean productExisted = false;
         for (Product product : products.getProducts()) {
-            productService.createProduct(product);
+            if(productService.isProductExists(product.getId())) {
+                productExisted = true;
+            }
         }
-        return new ResponseEntity<>("Product is created successfully", HttpStatus.OK);
+        if(productExisted)
+            throw new DuplicationIdException();
+        else {
+            for (Product product : products.getProducts()) {
+                productService.createProduct(product);
+            }
+        }
+            return new ResponseEntity<>("Product is created successfully", HttpStatus.OK);
     }
 
     @GetMapping(value = "/")
